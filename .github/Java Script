@@ -1,0 +1,457 @@
+/* ==================================
+   Bad-Godesberg Explorer
+   Version 1.0 Alpha
+================================== */
+
+const APP_VERSION = "V1.0 Alpha";
+
+let explorerData =
+JSON.parse(
+localStorage.getItem("bgExplorer")
+) || [];
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const versionElement =
+        document.getElementById("version");
+
+    if(versionElement){
+        versionElement.textContent =
+        APP_VERSION;
+    }
+
+    updateOnlineStatus();
+    updateStats();
+
+});
+
+window.addEventListener(
+    "online",
+    updateOnlineStatus
+);
+
+window.addEventListener(
+    "offline",
+    updateOnlineStatus
+);
+
+function updateOnlineStatus(){
+
+    const el =
+    document.getElementById(
+        "onlineStatus"
+    );
+
+    if(!el) return;
+
+    if(navigator.onLine){
+
+        el.innerHTML =
+        "🟢 Online";
+
+    }else{
+
+        el.innerHTML =
+        "🔴 Offline";
+
+    }
+
+}
+
+/* =====================
+   Orte speichern
+===================== */
+
+function addPlace(){
+
+    const name =
+    document.getElementById(
+        "poiName"
+    ).value;
+
+    if(!name){
+
+        alert(
+        "Bitte einen Ortsnamen eingeben."
+        );
+
+        return;
+    }
+
+    const entry = {
+
+        id: Date.now(),
+
+        name,
+
+        status:
+        document.getElementById(
+            "status"
+        ).value,
+
+        rating:
+        Number(
+        document.getElementById(
+            "rating"
+        ).value
+        ),
+
+        notes: []
+
+    };
+
+    explorerData.push(entry);
+
+    saveData();
+
+    renderPlaces();
+
+    updateStats();
+
+}
+
+/* =====================
+   Notizen hinzufügen
+===================== */
+
+function addNote(placeId){
+
+    const text =
+    prompt("Neue Notiz:");
+
+    if(!text) return;
+
+    const place =
+    explorerData.find(
+        p => p.id === placeId
+    );
+
+    if(!place) return;
+
+    place.notes.push({
+        text,
+        date:
+        new Date()
+        .toLocaleString("de-DE")
+    });
+
+    saveData();
+
+    renderPlaces();
+
+}
+
+/* =====================
+   Ort löschen
+===================== */
+
+function deletePlace(id){
+
+    explorerData =
+    explorerData.filter(
+        p => p.id !== id
+    );
+
+    saveData();
+
+    renderPlaces();
+
+    updateStats();
+
+}
+
+/* =====================
+   Render Liste
+===================== */
+
+function renderPlaces(){
+
+    const container =
+    document.getElementById(
+        "placeList"
+    );
+
+    if(!container) return;
+
+    container.innerHTML = "";
+
+    explorerData.forEach(place => {
+
+        const div =
+        document.createElement("div");
+
+        div.className =
+        "place-card";
+
+        div.innerHTML = `
+
+        <h3>${place.name}</h3>
+
+        <p>
+        Status:
+        <b>${place.status}</b>
+        </p>
+
+        <p>
+        Bewertung:
+        ${"⭐".repeat(place.rating)}
+        </p>
+
+        <button onclick="addNote(${place.id})">
+        📝 Notiz hinzufügen
+        </button>
+
+        <button onclick="deletePlace(${place.id})">
+        ❌ Löschen
+        </button>
+
+        <hr>
+
+        ${place.notes.map(note => `
+            <div class="note">
+                <small>${note.date}</small>
+                <br>
+                ${note.text}
+            </div>
+        `).join("")}
+
+        `;
+
+        container.appendChild(div);
+
+    });
+
+}
+
+/* =====================
+   Statistik
+===================== */
+
+function updateStats(){
+
+    const visited =
+    explorerData.filter(
+        x =>
+        x.status === "Besucht"
+    ).length;
+
+    const wishlist =
+    explorerData.filter(
+        x =>
+        x.status === "Wunschziel"
+    ).length;
+
+    const notes =
+    explorerData.reduce(
+        (sum,item) =>
+        sum + item.notes.length,
+        0
+    );
+
+    setText(
+        "countVisited",
+        visited
+    );
+
+    setText(
+        "countWishlist",
+        wishlist
+    );
+
+    setText(
+        "countNotes",
+        notes
+    );
+
+}
+
+function setText(id,value){
+
+    const el =
+    document.getElementById(id);
+
+    if(el){
+        el.textContent = value;
+    }
+
+}
+
+/* =====================
+   Export JSON
+===================== */
+
+function exportData(){
+
+    const exportObject = {
+
+        version:
+        APP_VERSION,
+
+        exportDate:
+        new Date()
+        .toISOString(),
+
+        places:
+        explorerData
+
+    };
+
+    const blob =
+    new Blob(
+
+        [
+            JSON.stringify(
+                exportObject,
+                null,
+                2
+            )
+        ],
+
+        {
+            type:
+            "application/json"
+        }
+
+    );
+
+    const a =
+    document.createElement("a");
+
+    a.href =
+    URL.createObjectURL(
+        blob
+    );
+
+    a.download =
+    "bad-godesberg-explorer.json";
+
+    a.click();
+
+}
+
+/* =====================
+   Import JSON
+===================== */
+
+function importData(event){
+
+    const file =
+    event.target.files[0];
+
+    if(!file) return;
+
+    const reader =
+    new FileReader();
+
+    reader.onload = e => {
+
+        try{
+
+            const imported =
+            JSON.parse(
+                e.target.result
+            );
+
+            explorerData =
+            imported.places || [];
+
+            saveData();
+
+            renderPlaces();
+
+            updateStats();
+
+            alert(
+            "Import erfolgreich"
+            );
+
+        }catch{
+
+            alert(
+            "Ungültige Datei"
+            );
+
+        }
+
+    };
+
+    reader.readAsText(file);
+
+}
+
+/* =====================
+   LocalStorage
+===================== */
+
+function saveData(){
+
+    localStorage.setItem(
+
+        "bgExplorer",
+
+        JSON.stringify(
+            explorerData
+        )
+
+    );
+
+}
+
+/* =====================
+   Demo Route
+===================== */
+
+function calculateRoute(){
+
+    const start =
+    document.getElementById(
+        "start"
+    ).value;
+
+    const destination =
+    document.getElementById(
+        "destination"
+    ).value;
+
+    if(
+        !start ||
+        !destination
+    ){
+        alert(
+        "Bitte Start und Ziel angeben."
+        );
+        return;
+    }
+
+    document.getElementById(
+        "routeResult"
+    ).innerHTML = `
+
+    <h3>Route</h3>
+
+    🚶 Fußweg:
+    2,1 km
+    (26 Min)
+
+    <br><br>
+
+    🚗 Auto:
+    3,0 km
+    (7 Min)
+
+    <br><br>
+
+    🚍 ÖPNV:
+    Linie 66
+    12 Min
+
+    `;
+
+}
+
+/* =====================
+   Initial Rendering
+===================== */
+
+renderPlaces();
+updateStats();
