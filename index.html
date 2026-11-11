@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f4ee">
+  <meta name="description" content="Dein persönlicher Reisebegleiter für Bad Godesberg: Lieblingsorte merken, Notizen festhalten und Ausflüge planen.">
+  <title>Bad Godesberg entdecken – dein Reisebegleiter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#start" aria-label="Bad Godesberg entdecken – Startseite">
+      <span class="brand-mark" aria-hidden="true">BG</span>
+      <span>Godesberg<span class="brand-light"> entdecken</span></span>
+    </a>
+    <nav class="top-actions" aria-label="Hauptnavigation">
+      <a href="#meine-orte">Meine Orte</a>
+      <a href="#planung">Ausflug planen</a>
+      <button class="button button-outline button-small" id="export-button" type="button">Daten exportieren</button>
+    </nav>
+  </header>
+
+  <main id="start">
+    <section class="hero">
+      <div class="hero-content">
+        <p class="eyebrow"><span class="eyebrow-dot"></span> DEIN PERSÖNLICHER STADTGUIDE</p>
+        <h1>Ein schöner Tag<br>beginnt <em>hier.</em></h1>
+        <p class="hero-copy">Sammle deine Lieblingsorte, halte Erinnerungen fest und mach deinen nächsten Ausflug nach Bad Godesberg zu deinem eigenen.</p>
+        <a class="button button-light" href="#meine-orte">Meine Entdeckungstour starten <span aria-hidden="true">↓</span></a>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="sun"></div><div class="hill hill-back"></div><div class="hill hill-front"></div>
+        <div class="tower"><span></span></div>
+        <div class="hero-caption"><span class="caption-line"></span> BAD GODESBERG · BONN</div>
+      </div>
+      <div class="hero-side-note" aria-hidden="true">RHEIN · RHEINLAND</div>
+    </section>
+
+    <section class="stats" aria-label="Deine Übersicht">
+      <div class="stat"><span class="stat-icon">⌖</span><div><strong id="count-places">0</strong><span>gespeicherte Orte</span></div></div>
+      <div class="stat"><span class="stat-icon">♥</span><div><strong id="count-visited">0</strong><span>bereits besucht</span></div></div>
+      <div class="stat"><span class="stat-icon">✎</span><div><strong id="count-notes">0</strong><span>deine Notizen</span></div></div>
+      <div class="online-pill"><span class="status-dot" id="online-dot"></span><span id="online-status">Online</span></div>
+    </section>
+
+    <section class="content-grid" id="meine-orte">
+      <div class="main-column">
+        <div class="section-heading">
+          <div><p class="eyebrow eyebrow-dark">DEIN KLEINES REISEJOURNAL</p><h2>Deine Orte</h2></div>
+          <span class="result-count" id="result-count">0 Orte</span>
+        </div>
+        <div class="toolbar">
+          <label class="search-box"><span aria-hidden="true">⌕</span><input id="search-input" type="search" placeholder="Ort oder Notiz suchen …" aria-label="Orte durchsuchen"></label>
+          <label class="filter-wrap"><span class="sr-only">Nach Status filtern</span><select id="filter-select"><option value="Alle">Alle Orte</option><option value="Wunschziel">Auf meiner Wunschliste</option><option value="Besucht">Schon besucht</option></select></label>
+        </div>
+        <div id="place-list" class="place-list" aria-live="polite"></div>
+        <div id="empty-state" class="empty-state">
+          <div class="empty-illustration" aria-hidden="true">⌖</div>
+          <h3>Deine Entdeckungstour wartet</h3>
+          <p>Hier erscheinen deine Lieblingsorte. Füge rechts deinen ersten Ort hinzu und sammle Ideen für den nächsten Ausflug.</p>
+          <button class="text-button" id="empty-add-button" type="button">＋ Ersten Ort hinzufügen</button>
+        </div>
+        <div id="no-results" class="empty-state no-results" hidden><h3>Nichts gefunden</h3><p>Versuch es mit einem anderen Suchbegriff oder Filter.</p></div>
+      </div>
+
+      <aside class="sidebar">
+        <section class="panel add-panel" id="add-place-panel">
+          <p class="eyebrow eyebrow-dark">NEUE IDEE</p>
+          <h2>Ort hinzufügen</h2>
+          <p class="panel-intro">Was möchtest du in Bad Godesberg entdecken?</p>
+          <form id="place-form">
+            <label for="poi-name">Name des Ortes <span class="required">*</span></label>
+            <input id="poi-name" name="name" type="text" placeholder="z. B. Lieblingscafé" maxlength="100" required>
+            <label for="poi-category">Kategorie</label>
+            <select id="poi-category" name="category"><option>Café & Genuss</option><option>Natur & Spaziergang</option><option>Kultur & Geschichte</option><option>Einkaufen</option><option>Übernachtung</option><option>Sonstiges</option></select>
+            <div class="form-row">
+              <div><label for="poi-status">Status</label><select id="poi-status" name="status"><option value="Wunschziel">Möchte ich besuchen</option><option value="Besucht">Schon besucht</option></select></div>
+              <div><label for="poi-rating">Bewertung</label><select id="poi-rating" name="rating"><option value="0">Noch offen</option><option value="5">★★★★★</option><option value="4">★★★★☆</option><option value="3">★★★☆☆</option><option value="2">★★☆☆☆</option><option value="1">★☆☆☆☆</option></select></div>
+            </div>
+            <label for="poi-note">Notiz <span class="optional">(optional)</span></label>
+            <textarea id="poi-note" name="note" rows="3" maxlength="1000" placeholder="Was möchtest du dir merken?"></textarea>
+            <button class="button button-primary button-full" type="submit"><span aria-hidden="true">＋</span> Ort speichern</button>
+            <p class="privacy-note"><span aria-hidden="true">▣</span> Deine Daten bleiben auf diesem Gerät.</p>
+          </form>
+        </section>
+        <section class="panel planner-panel" id="planung">
+          <div class="planner-icon" aria-hidden="true">↗</div>
+          <p class="eyebrow eyebrow-dark">RAUS INS GRÜNE</p>
+          <h3>Wohin geht’s?</h3>
+          <p>Plane deine nächste Route direkt mit deinem bevorzugten Kartendienst.</p>
+          <form id="route-form" class="route-form">
+            <label class="sr-only" for="route-start">Startpunkt</label><input id="route-start" type="text" placeholder="Startpunkt, z. B. Bad Godesberg" value="Bad Godesberg, Bonn">
+            <label class="sr-only" for="route-destination">Ziel</label><input id="route-destination" type="text" placeholder="Wohin möchtest du?" required>
+            <button class="button button-dark button-full" type="submit">Route in Maps öffnen <span aria-hidden="true">↗</span></button>
+          </form>
+          <p class="planner-hint">Öffnet eine Wegbeschreibung in OpenStreetMap.</p>
+        </section>
+        <section class="panel data-panel">
+          <div><strong>Dein Reisejournal sichern</strong><p>Exportiere deine Orte oder importiere eine Sicherung.</p></div>
+          <button class="button button-outline button-full" id="import-button" type="button">Sicherung importieren</button>
+          <input id="import-file" type="file" accept="application/json,.json" hidden>
+        </section>
+      </aside>
+    </section>
+  </main>
+
+  <footer class="footer"><a class="brand footer-brand" href="#start"><span class="brand-mark">BG</span><span>Godesberg<span class="brand-light"> entdecken</span></span></a><span>Dein persönliches Reisejournal · Daten werden lokal gespeichert</span><a href="#start">Nach oben ↑</a></footer>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <dialog id="note-dialog" class="note-dialog"><form method="dialog" id="note-form"><button class="dialog-close" value="cancel" aria-label="Schließen">×</button><p class="eyebrow eyebrow-dark">REISEJOURNAL</p><h2>Notiz hinzufügen</h2><p class="dialog-place" id="dialog-place-name"></p><label for="note-text">Deine Notiz</label><textarea id="note-text" rows="5" maxlength="1000" placeholder="Was möchtest du dir merken?" required></textarea><div class="dialog-actions"><button class="button button-outline" value="cancel">Abbrechen</button><button class="button button-primary" id="save-note-button" value="save">Notiz speichern</button></div></form></dialog>
+</body>
+</html>
